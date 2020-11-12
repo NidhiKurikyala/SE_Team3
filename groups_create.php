@@ -22,7 +22,13 @@ if(isset($_POST["group_name"]) && isset($_POST["description"])){
 }
 
 //retrieving groups which user is present in
-$retResult = $group_obj->retrieveGroups($user_data->username);
+$retResult = $group_obj->retrieveGroups($user_data->username, true);
+
+////retrieving groupId's which user is present in
+$retResultId = $group_obj->retrieveGroups($user_data->username, false);
+
+//retrieving all groups
+$retAllGroups = $group_obj->allGroups($user_data->username);
 
 //username
 $uname = $user_data->username;
@@ -73,11 +79,11 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
 
     <nav>
         <ul>
-            <li><a href="profile.php" rel="noopener noreferrer" class="active">Home</a></li>
+            <li><a href="profile.php" rel="noopener noreferrer" >Home</a></li>
 
             <li><a href="expense.php" rel="noopener noreferrer">Add an Expense</a></li>
             <li><a href="balance.php" rel="noopener noreferrer">Balance</a></li>
-            <li><a href="groups.php" rel="noopener noreferrer">Groups</a></li>
+            <li><a href="groups_create.php" rel="noopener noreferrer" class="active">Groups</a></li>
 
             <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Edit
@@ -115,6 +121,7 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
                                             <td><label for="description">Description: </label></td>
                                             <td><input type="text" name="description" placeholder="Expense Description"></td>
                                         </tr>
+                                       
                                         <tr><td><label for="group_name">Add Group Members: </label></td></tr>
                                         <tr>
                                             <td><input type="text" name="name[]" placeholder="Enter your Name" class="form-control name_list" required></td>
@@ -175,11 +182,24 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
                 <div class="all_users">
                     <h1>Group Names</h1>
                 <?php
-                foreach ($retResult as $item) {
+				if($retResultId>0)
+				{
+                foreach ($retResultId as $id_num){
+                    foreach ($retResult as $item) {
+                        foreach ($retAllGroups as $row){
+                            if($row->id === $id_num and $row->group_name === $item){
+
                         echo '<div class="user_box">
                                  <div class="user_info"><span>'.$item.'</span></div>
+                                 <span><a href="groups_expense.php?id='.$id_num.'" class="see_profileBtn">View</a></span>
                                </div>';
+                            }
+                        }
                     }
+
+                }
+				}
+
                 ?>
                 </div>
                 </div>
@@ -189,4 +209,3 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
 </div>
 </body>
 </html>
-
