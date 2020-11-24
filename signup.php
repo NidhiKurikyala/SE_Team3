@@ -9,7 +9,7 @@ if(isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password
 }
 
 //user logged in already
-if(isset($_SESSION['email'])){
+if(isset($_SESSION['email']) ){
     header('Location: profile.php');
 }
 ?>
@@ -25,7 +25,14 @@ if(isset($_SESSION['email'])){
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
 </head>
 <body>
+<div class="profile_container">
+<div class="inner_profile">
+    <img src="logo.jpeg" alt="Eazy Roommate" align="left" width="120" height="120">
+</div>
 <div class="main_container login_signup_container">
+
+
+
     <h1>Sign Up</h1>
     <form action="" method="POST" novalidate>
         <label for="username">Full Name</label>
@@ -41,14 +48,15 @@ if(isset($_SESSION['email'])){
     </form>
     <div>
         <?php
-        if(isset($email_result['errorMessage'])){
-            echo '<p class="errorMsg">'.$email_result['errorMessage'].'</p>';
+        if(isset($result['errorMessage'])){
+            echo '<p class="errorMsg">'.$result['errorMessage'].'</p>';
         }
-        if(isset($email_result['successMessage'])){
-            echo '<p class="successMsg">'.$email_result['successMessage'].'</p>';
+        if(isset($result['successMessage'])){
+            echo '<p class="successMsg">'.$result['successMessage'].'</p>';
         }
         ?>
     </div>
+</div>
 </div>
 </body>
 </html>

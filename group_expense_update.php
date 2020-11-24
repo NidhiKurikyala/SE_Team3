@@ -7,48 +7,43 @@ if(isset($_SESSION['user_id']) && isset($_SESSION['email'])){
     }
 
     //getting username from URL and retrieving from SQL
-    if(isset($_GET['id'])) {
+    if(isset($_GET['id'])){
         $groupId = $_GET['id'];
         $group_data = $group_obj->find_group_members($_GET['id']);
         $group_expense_data = $group_obj->find_group_expense($_GET['id']);
-        $flag = false;
-        if ($group_expense_data) {
-            foreach ($group_expense_data as $row) {
-                if ($user_data->username === $row->paid_by) {
-                    $flag = true;
-                }
-            }
-            if (!$flag) {
-
-                foreach ($group_data as $j) {
-                    if ($j === $user_data->username) {
-                        $flag = true;
-
-                        break;
-                    } else {
-                        $flag = false;
-
-                        break;
-                    }
-                }
-
-            }
-        }
-    }
-
-
-
         $group_name = $group_obj->groupName($_GET['id']);
 //        if($group_data===false){
 //            header('Location: profile.php');
 //            exit;
 //        }
-
-
-    //insert group expense data
-    if(isset($_POST['expense_name']) && isset($_POST['description']) && isset($_POST['amount'])){
-        $result = $group_obj->groupExpense($_GET['id'],$_POST['expense_name'], $_POST['description'],$_POST['amount'],$_POST['name'],$user_data->username);
     }
+
+    if(isset($_GET['id'])){
+        //$group_data = $group_obj->find_group_members($_GET['id']);
+        $expense_name = $_GET['id'];
+        $group_expense_data = $group_obj->find_group_expenses($_GET['id']);
+        foreach ($group_expense_data as $row){
+            if($row->expense_name === $_GET['id']){
+                $group_data = $group_obj->find_group_expense_members($row->expense_name);
+                $group_name = $group_obj->groupName($row->group_id);
+            }
+        }
+
+
+//        if($group_data===false){
+//            header('Location: profile.php');
+//            exit;
+//        }
+    }
+
+    //Updating group expense data
+
+    if( isset($_POST['description']) && isset($_POST['amount']) && isset($_POST['name'])){
+        $result = $group_obj->updateGroupExpense($_GET['id'], $_POST['description'],$_POST['amount'],$_POST['name'],$user_data->username);
+    }
+    
+
+
 }
 else{
     header('Location: logout.php');
@@ -77,16 +72,25 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><?php echo  $user_data->username ;?></title>
-<link rel="stylesheet" href="./style.css">
-<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="profile_container">
+<!--    <div class="inner_profile">-->
+<!--        <img src="logo.jpeg" alt="Eazy Roommate" align="left" width="120" height="120">-->
+<!---->
+<!--        <div class="img">-->
+<!--            <img src="profile_images/--><?php //echo $user_data->user_image;?><!--" alt="Profile image">-->
+<!--        </div>-->
+<!--        <h1>--><?php //echo $user_data->username;?><!--</h1>-->
+
+<!--    </div>-->
     <div class="inner_profile">
         <img src="logo.jpeg" alt="Eazy Roommate" align="left" width="120" height="120">
         <div class="img" align="center" style="margin-left: 45%;">
@@ -95,8 +99,7 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
             <img src="profile_images/<?php echo $user_data->user_image;?>" alt="Profile image">
         </div>
         <h1 style="margin-right: 13%;"><?php echo $user_data->username;?></h1>
-        <h1 style="margin-right: 13%;">Group Name: <u><?php echo $group_name->group_name;?></u></h1>
-
+        <h1>Group Name: <u><?php echo $group_name->group_name;?></u></h1>
     </div>
 
 
@@ -133,13 +136,13 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
                     <div class="form-group">
                         <form action="" method="POST" name="add_name" id="add_name">
                             <div class="table-responsive">
-                                <table><tr><th>Create Group Expense</th></tr></table>
+                                <table><tr><th>Update Group Expense</th></tr></table>
 
                                 <table class="table table-bordered" id="dynamic_field">
 
                                     <tr>
                                         <td> <label for="expense_name">Expense name:</label></td>
-                                        <td><input type="text" name="expense_name" placeholder="Enter Group Name"></td>
+                                        <td><input type="text" name="expense_name" placeholder="Enter Group Name" value="<?php echo $expense_name?>" disabled></td>
                                     </tr>
                                     <tr>
                                         <td><label for="description">Description: </label></td>
@@ -160,18 +163,18 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
                                                         echo '<input type="checkbox" id="' . $item . '" name="name[]" value="' . $item . '">
                                                     <label for="' . $item . '"> ' . $item . '</label><br>';
                                                     }
-                                            }
+                                                }
                                             }
                                             ?>
 
                                         </td>
 
                                     </tr>
-                                    
+
                                 </table>
 
                             </div>
-                            <input type="submit" name="submit" id="submit" class="btn btn-info" value="Submit" />
+                            <input type="submit" name="submit" id="submit" class="btn btn-info" value="Update" />
                         </form>
                         <div>
                             <?php
@@ -188,52 +191,24 @@ $get_frnd_num = $friend_obj->get_all_friends($_SESSION['user_id'], false);
 
             </div>
             <div class="col">
-                <div class="profile_container">
+
+
                     <div class="all_users">
-                        <h4>Group Members</h4>
+                        <h4>Current Expense</h4>
                         <?php
-                        if($all_users){
-                            foreach ($group_data as $item) {
-                                foreach ($all_users as $row) {
-                                    if ($row->username === $item) {
-                                        $uid = $row->id;
-                                    } elseif ($uname === $item) {
-                                        $uid = $user_data->id;
-                                    }
-
-                                }
-
+                        if($group_expense_data) {
+                            foreach ($group_expense_data as $item) {
                                 echo '<div class="user_box">
-                                 <div class="user_info"><span>'.$item.'</span></div>';
-                                if($uname !== $item){
-                                echo '<span><a href="user_profile.php?id='.$uid.'" class="see_profileBtn">See Profile</a></span>
-                               </div>';
-                                }
-                                elseif ($uname === $item){
-                                    echo '</div>';
-                                }
-
-                            }
-                        }
-                        ?>
-                    </div>
-
-                    <div class="all_users">
-                        <h4>Group Expenses</h4>
-                        <?php
-                            if($group_expense_data && $flag) {
-                                foreach ($group_expense_data as $item) {
-                                    echo '<div class="user_box">
                                  <div class="user_info"><span>' . $item->expense_name . '</span></div>
                                  <span><a href="group_expense_profile.php?id=' . $item->expense_name . '" class="see_profileBtn">View</a></span></div>';
-                                }
                             }
-                            else{
-                                echo '<div class="user_box">
-                                 <div class="user_info"><span>There are no expenses!</span></div>
+                        }
+                        else{
+                            echo '<div class="user_box">
+                                 <div class="user_info"><span>There are no expenses</span></div>
                                  
                                </div>';
-                            }
+                        }
                         ?>
                     </div>
 
